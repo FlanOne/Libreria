@@ -174,4 +174,4 @@ def agregarCliente( nombre, apellido, fecha_nacimiento, direccion, telefono, cor
     print("creado con exito")
     conn.commit()
 
-##SEOKJINTEAMOOOO
+##SEOKJINTEAMOOOOoooOOOooo
