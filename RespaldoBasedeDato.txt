@@ -1,0 +1,202 @@
+CREATE TABLE cliente (
+cliente_id integer primary key,
+nombre varchar not null,
+apelliddo varchar not null,
+fecha_nacimiento date,
+direccion varchar,
+telefono varchar,
+correo varchar,
+contrasena varchar not null);
+
+CREATE TABLE libro(
+isbn varchar primary key,
+libro_id integer ,
+nombre varchar,
+fecha_publicacion date,
+precio integer,
+sinopsis varchar,
+stock integer,
+autor varchar ,
+calificacion integer check(calificacion <= 5),
+imagen varchar,
+calificaciones integer);
+
+
+
+
+create table sucursal(
+sucursal_id integer primary key,
+direccion varchar);
+
+CREATE TABLE public.compra
+(
+    compra_id integer,
+    fecha date NOT NULL,
+    total integer NOT NULL,
+    sucursal_id integer NOT NULL,
+    cliente_id integer NOT NULL,
+    PRIMARY KEY (compra_id),
+    CONSTRAINT sucursal_id FOREIGN KEY (sucursal_id)
+        REFERENCES public.sucursal (sucursal_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT cliente_id FOREIGN KEY (cliente_id)
+        REFERENCES public.cliente (cliente_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+CREATE TABLE public.libroxcompra
+(
+    isbn varchar NOT NULL,
+    compra_id integer NOT NULL,
+    cantidad_comprada integer,
+    CONSTRAINT libro_id FOREIGN KEY (isbn)
+        REFERENCES public.libro (isbn) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT compra_id FOREIGN KEY (compra_id)
+        REFERENCES public.compra (compra_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+CREATE TABLE public.empleado
+(
+    empleado_id integer,
+    nombre varchar NOT NULL,
+    apellido varchar NOT NULL,
+    fecha_contrato date NOT NULL,
+    edad integer NOT NULL,
+    jefe_id integer NOT NULL,
+    sueldo integer NOT NULL,
+    sucursal_id integer NOT NULL,
+	correo varchar not null,
+	contrasena varchar not null,
+    PRIMARY KEY (empleado_id),
+    CONSTRAINT sucursal_id FOREIGN KEY (sucursal_id)
+        REFERENCES public.sucursal (sucursal_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+CREATE TABLE public.camioneta
+(
+    camioneta_id integer,
+    patente varchar NOT NULL,
+    marca varchar NOT NULL,
+    modelo varchar NOT NULL,
+    PRIMARY KEY (camioneta_id)
+);
+
+CREATE TABLE public.despacho
+(
+    despacho_id integer,
+    fecha_salida date NOT NULL,
+    fecha_entrega date NOT NULL,
+    compra_id integer NOT NULL,
+    empleado_id integer NOT NULL,
+    camioneta_id integer NOT NULL,
+    PRIMARY KEY (despacho_id),
+    CONSTRAINT compra_id FOREIGN KEY (compra_id)
+        REFERENCES public.compra (compra_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT empleado_id FOREIGN KEY (empleado_id)
+        REFERENCES public.empleado (empleado_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID,
+    CONSTRAINT camioneta_id FOREIGN KEY (camioneta_id)
+        REFERENCES public.camioneta (camioneta_id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+        NOT VALID
+);
+
+
+ 
+
+insert into cliente values('1','Ernesto','Paredes','26/9/1999','Huechuraba','+34971083785','ernesto@gmail.com','123');
+insert into cliente values('2','Benjamin','Sanchez','28/11/2000','Las Condes','642379224','benja@gmail.com','123');
+insert into cliente values('3','Michelle','Santos','28/3/2000','Vitacura','+34912536908','michelle@gmail.com','123');
+
+select * from cliente;
+select * from libro
+order by libro_id;
+
+insert into libro values('9788481093353','1','DON QUIJOTE DE LA MANCHA (VOL. 1)','1/1/1605','25900',
+						   'un hidalgo',
+						  '5','Miguel cervantes','4','DonQuijote.jpg','6');
+						  
+insert into libro values('9788466657662','2','El camino de los reyes (EL archivo de las tormentas 1)','31/8/2010','28530',
+						   'Anhelo los días previos a la Última Desolación. Los días en que los Heraldos nos abandonaron y los Caballeros Radiantes se giraron en nuestra contra. Un tiempo en que aún había magia en el mundo y honor en el corazón de los hombres. El mundo fue nuestro, pero lo perdimos. Probablemente no hay nada más estimulante para las almas de los hombres que la victoria. ¿O tal vez fue la victoria una ilusión durante todo ese tiempo? ¿Comprendieron nuestros enemigos que cuanto más duramente luchaban, más resistíamos nosotros? Quizá vieron que el fuego y el martillo tan solo producían mejores espadas. Pero ignoraron el acero durante el tiempo suficiente para oxidarse. Hay cuatro personas a las que observamos. La primera es el médico, quien dejó de curar para convertirse en soldado durante la guerra más brutal de nuestro tiempo. La segunda es el asesino, un homicida que llora siempre que mata. La tercera es la mentirosa, una joven que viste un manto de erudita sobre un corazón de ladrona. Por último está el alto príncipe, un guerrero que mira al pasado mientras languidece su sed de guerra. El mundo puede cambiar. La potenciación y el uso de las esquirlas pueden aparecer de nuevo, la magia de los días pasados puede volver a ser nuestra. Esas cuatro personas son la clave. Una de ellas nos redimirá. Y una de ellas nos destruirá.',
+						  '10','Brandon Sanderson','3','StormLight.jpg','5');
+
+insert into libro values('9788415922940','3','Vagabond 01','25/7/2013','9990',
+						   'Takezo y Matahachi. dos chicos de 17 años que sueñan con alcanzar la fama, ganaran o perderan?, sobreviviran o moriran?.',
+						  '18','Takehiko Inoue','2','Vagabond01.jpg','9');
+						  
+insert into libro values('9789877251470','4','Cancion de hielo y fuego 1: Juego de tronos','1/1/2014','36770',
+						 'Juego de tronos es el primer volumen de Canción de hielo y fuego, la monumental saga de fantasía épica del escritor George R. R. Martin que ha vendido más de 20 millones de ejemplares en todo el mundo. De la saga que inspiró la filmación de la aclamada serie televisiva de HBO: Game of Thrones. En el legendario mundo de los Siete Reinos, donde el verano puede durar décadas y el invierno toda una vida, y donde rastros de una magia inmemorial surgen en los rincones más sombríos, la tierra del norte, Invernalia, está resguardada por un colosal muro de hielo que detiene a fuerzas oscuras y sobrenaturales. En este majestuoso escenario, lord Stark y su familia se encuentran en el centro de un conflicto que desatará todas las pasiones: la traición y la lealtad, la compasión y la sed de venganza, el amor y el poder, la lujuria y el incesto, todo ello para ganar la más mortal de las batallas: el trono de hierro, una poderosa trampa que atrapará a los personajes... y al lector.',
+						'20','George R.R. Martin','4','hieloyfuego.jpg','5');
+						
+insert into libro values('8420651362','5','La Metamorfosis','2/10/1915','12590',
+						 'La metamorfosis, obra del escritor checo Franz Kafka uno de los autores fundamentales de la literatura del pasado siglo, continúa, con ilustraciones del dibujante valenciano Paco Roca, la colección Clásicos Ilustrados de Astiberri, donde una novela completa o, como en este caso, una recopilación de relatos de un autor de referencia de la literatura, es interpretada gráficamente por un dibujante de cómics con una serie de ilustraciones distribuidas a lo largo del libro principalmente a toda página.Paco Roca no tenía dudas a la hora de elegir a Kafka como autor clásico sobre el que alzar su mirada: Desde que leyera de crío La metamorfosis, Kafka se convirtió en uno de mis autores favoritos. Recuerdo que pasar de Julio Verne a leer La metamorfosis fue para mí todo un golpe, me pasé meses intentando asimilar aquello. Es una sensación que aún sigo teniendo con Kafka, sus relatos nunca me dejan indiferente. Debo reconocer que mi novela gráfica Las calles de arena está muy influenciada por El castillo o El proceso, confiesa Paco Roca.El autor de Arrugas se ha dejado llevar por el camino de la experimentación, evitando reproducir momentos concretos del libro o hacerlo de una forma muy explícita, para indagar en partes del relato que están en el fondo del mismo o tomar un punto de vista distinto al del narrador de turno: Espero que las licencias que me he tomado con el texto original no hagan revolverse a los puristas de Kafka. Los cuentos de Kafka me parecen muy sugerentes; esa atmósfera opresiva que crea, esos personajes... Me atraía mucho meterme en esos relatos y crear historias paralelas dentro de ellos. Incluso me he quedado con las ganas de desarrollar alguna de ellas en un cómic. Quizá algún día, aventura Roca.La casi treintena de ilustraciones, algunas de ellas a media o doble página, pone en imágenes tanto La metamorfosis, que abre la recopilación, como los relatos de La condena, El fogonero. Un fragmento, En la colonia penitenciaria, El maestro rural, Un médico rural, El cazador Gracchus, Chacales y árabes, La construcción de la Muralla China, Informe para una Academia, Un artista del hambre y, por último, Josefina, la cantora, o el pueblo de los ratones.',
+						 '17','Franz Kafka','3','metamorfosis.jpg','8');
+						  
+select * from sucursal;
+						  
+insert into sucursal values('1','Quilicura');
+insert into sucursal values('2','La Reina');	
+insert into sucursal values('3','Las Condes');	
+
+select * from compra;
+
+insert into compra values('1','12/12/2022','28530','1','1');
+insert into compra values('2','12/12/2022','9990','2','2');
+insert into compra values('3','12/12/2022','25900','3','3');
+insert into compra values('4','1/9/2021','12590','1','1');
+insert into compra values('5','12/12/2022','28530','1','1');
+						  
+select * from libroxcompra;
+
+insert into libroxcompra values('9788466657662','1','1');
+insert into libroxcompra values('9788415922940','2','1');
+insert into libroxcompra values('9788481093353','3','1');
+insert into libroxcompra values('8420651362','4','1');
+insert into libroxcompra values('9788466657662','5','2');
+
+select * from empleado;
+
+insert into empleado values ('1','Vicente','Cruz','12/12/2022','22','1','200000','1','vicente@gmail.com','admin');
+insert into empleado values ('2','Pedro','Fernandes','24/1/2022','25','1','180000','2','fec@gmail.com','admin2');
+insert into empleado values ('3','Juan','King','10/12/2022','18','1','205800','3','alo@gmail.com','admin3');
+
+select * from camioneta;
+
+insert into camioneta values('1','XH-66-40','Honda','city');
+
+select * from despacho;
+
+insert into despacho values('1','12/12/2022','14/12/2022','1','2','1');
+insert into despacho values('2','12/12/2022','14/12/2022','2','3','1');
+insert into despacho values('3','12/12/2022','14/12/2022','3','2','1');
+
+
+
+
+select l.nombre, to_char(l.precio, '$999,999') from libro l join libroxcompra x using (isbn) join compra b using (compra_id) group by l.nombre, l.precio order by sum(x.cantidad_comprada) DESC;
+
+select * from libro
+
+
+select isbn, libro_id, nombre, to_char(fecha_publicacion, 'dd/mm/yyyy'), to_char(precio, '$999,999'), sinopsis, stock, autor, calificacion, imagen, calificaciones from libro;
+
+
