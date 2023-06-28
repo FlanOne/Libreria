@@ -173,3 +173,5 @@ def agregarCliente( nombre, apellido, fecha_nacimiento, direccion, telefono, cor
     cur.execute(comando)
     print("creado con exito")
     conn.commit()
+
+##SEOKJINTEAMOOOO
