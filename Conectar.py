@@ -176,3 +176,4 @@ def agregarCliente( nombre, apellido, fecha_nacimiento, direccion, telefono, cor
 
 ##SEOKJINTEAMOOOO
 #Benja troll
+#Que gila porfavor dejemos de llorar por todas las notas existentes pipipipipipi
