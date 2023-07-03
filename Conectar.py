@@ -174,4 +174,78 @@ def agregarCliente( nombre, apellido, fecha_nacimiento, direccion, telefono, cor
     print("creado con exito")
     conn.commit()
 
-##SEOKJINTEAMOOOOoooOOOooo
+'''/*Trigger actualizar dirección (tabla sucursal) y se
+inserta en una tabla de cambios.*/
+create sequence seq_cambios;
+
+create table cambios_sucursal (
+	registro_id int default nextval ('seq_cambios'),
+	sucursal_id int,
+	direccion_antigua varchar (100),
+	direccion_nueva varchar (100),
+	fecha_registro timestamp default current_timestamp,
+	constraint pk_registro_cambios primary key (registro_id)
+);
+
+create or replace function fn_actualizar_direccion ()
+returns trigger as $$
+begin
+	insert into cambios_sucursal (sucursal_id, direccion_antigua, direccion_nueva)
+	values (old.sucursal_id, old.direccion, new.direccion);
+	return new;
+end;
+$$ language plpgsql;
+
+create trigger trg_actualizar_direccion
+after update on sucursal
+for each row
+execute function fn_actualizar_direccion ();
+
+--Probar.
+select * from cambios_sucursal;
+select * from sucursal;
+
+update sucursal
+set direccion = '620 Broadway New York, New York 10021'
+where sucursal_id = 1;
+
+/*Trigger que antes de insertar en la tabla libroxcompra, verifica si el libro ya ha sido comprado
+por el mismo cliente en una fecha cercana para evitar ventas duplicadas.*/
+--COMPILA SIN ERRORES PERO ESTA INSERTANDO IGUAL SIN TOMAR EN CUENTA EL EXCEPTION.
+create or replace function fn_verificar_compra_duplicada()
+returns trigger as $$
+declare
+    cliente_id_temp INT;
+begin
+    cliente_id_temp := (select cliente_id from compra where compra_id = new.compra_id);
+    if exists (
+        select 1
+        from libroxcompra lc
+        join compra c on lc.compra_id = c.compra_id
+        where lc.isbn = new.isbn
+          and c.compra_id <> new.compra_id
+          and c.cliente_id = cliente_id_temp
+          and c.fecha >= (current_date - interval '7 days')
+          and c.fecha <= current_date
+    ) then
+        raise exception 'ADVERTENCIA: Este libro ya ha sido comprado por el mismo cliente en una fecha cercana. Evite compras duplicadas.';
+    end if;
+
+    return new;
+end;
+$$ language plpgsql;
+
+create or replace trigger trg_verificar_compra_duplicada
+before insert on libroxcompra
+for each row
+execute function fn_verificar_compra_duplicada();
+
+-- Probar.
+select * from libroxcompra;
+select * from compra;
+
+insert into libroxcompra (isbn, compra_id, cantidad_comprada)
+values ('9788466657662', 4, 1); --Exception.
+
+insert into libroxcompra (isbn, compra_id, cantidad_comprada)
+values ('9788481093353', 5, 1); --Insertar.'''
