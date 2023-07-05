@@ -2,7 +2,7 @@ import tkinter as tk
 
 class Boleta(tk.Tk):
     width = 500
-    height = 300
+    height = 400
 
     def __init__(self, boleta_id, items, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -51,8 +51,8 @@ class Boleta(tk.Tk):
             cantidad = item["cantidad"]
             precio_unitario = item["precio_unitario"]
 
-            libro_label = tk.Label(nombre_frame, text=libro_nombre, font=("Arial", 12), bg="white", anchor="w")
-            libro_label.pack()
+            libro_label = tk.Label(nombre_frame, text=libro_nombre, font=("Arial", 12), bg="white", anchor="center")
+            libro_label.pack(fill=tk.X)
 
             cantidad_label = tk.Label(cantidad_frame, text=f"{cantidad}", font=("Arial", 12), bg="white")
             cantidad_label.pack()
