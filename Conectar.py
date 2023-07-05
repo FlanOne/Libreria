@@ -20,18 +20,6 @@ def comprobarCliente(user, password):
 
 #comprobarCliente("ernesto@gmail.com" , "123")        
     
-def comprobarEmpleado(user, password):
-    
-    cur= conn.cursor()
-    comando = "select e.correo, e.contrasena from empleado e where e.correo = '"+user+"' and e.contrasena = '"+password+"'"
-    cur.execute(comando)
-    rows = cur.fetchall() ##pasar arreglo a la variable row
-    conn.commit()
-
-    if (len(rows)==0):
-        return False
-    else:
-        return True
 
 
 def LibrosMasVendidos():
@@ -175,3 +163,6 @@ def agregarCliente( nombre, apellido, fecha_nacimiento, direccion, telefono, cor
     conn.commit()
 
 ##SEOKJINTEAMOOOO
+#Benja troll
+#Que gila porfavor dejemos de llorar por todas las notas existentes pipipipipipi
+#se terminan los comentarios en el main
