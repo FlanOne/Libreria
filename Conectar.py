@@ -24,7 +24,7 @@ def comprobarCliente(user, password):
 
 def LibrosMasVendidos():
     cur = conn.cursor()
-    comando = "select l.nombre, to_char(l.precio, '$999,999'), l.imagen, l.isbn from libro l join libroxcompra x using (isbn) join compra b using (compra_id) group by l.nombre, l.precio, l.imagen, l.isbn order by sum(x.cantidad_comprada) DESC"
+    comando = "select l.nombre, to_char(l.precio, '$999,999'), l.imagen, l.isbn from libro l join libroxcompra x using (isbn) join boleta b using (boleta_id) group by l.nombre, l.precio, l.imagen, l.isbn order by sum(x.cantidad_comprada) DESC"
     cur.execute(comando)
     rows = cur.fetchall()
     conn.commit()
@@ -35,7 +35,7 @@ def LibrosMasVendidos():
 
 def buscadorNombreIsbn(nombre):
     cur = conn.cursor()
-    comando= "select isbn, libro_id, nombre, to_char(fecha_publicacion, 'dd/mm/yyyy'), to_char(precio, '$999,999'), sinopsis, stock, autor, calificacion, imagen, calificaciones from libro where  nombre = '"+nombre+"'"
+    comando= "select isbn, libro_id, nombre, to_char(fecha_publicacion, 'dd/mm/yyyy'), to_char(precio, '$999,999'),sinopsis, stock_actual, autor, calificacion, imagen, calificaciones from libro join inventario using(isbn) where  nombre = '"+nombre+"'"
     #comando = "select * from libro l where  l.nombre = '"+nombre+"'"
     cur.execute(comando)
     rows = cur.fetchall()
@@ -43,7 +43,7 @@ def buscadorNombreIsbn(nombre):
     #print(rows)
     return rows
 
-#print(buscadorNombreIsbn('El camino de los reyes', '1'))
+#print(buscadorNombreIsbn('Vagabond 01'))
 
 #retornar cliente para guardarlo en el inicio de sesion para cuando vaya a comprar quede registrado
 def traerClienteId(user, password):
@@ -61,7 +61,7 @@ def traerClienteId(user, password):
 
 def NumeroComrpras():
     cur = conn.cursor()
-    comando = "select count(c.compra_id) from compra c"
+    comando = "select count(c.boleta_id) from boleta c"
     cur.execute(comando)
     rows = cur.fetchall()
     conn.commit()
@@ -73,7 +73,7 @@ def agregarCompra(id_client, precioLibro):
     cur = conn.cursor()
     id = NumeroComrpras()
     fecha = datetime.datetime.now()
-    comando="insert into compra(compra_id, fecha, total, sucursal_id, cliente_id) values("+str(id)+",'"+str(fecha.strftime("%d/%m/%Y"))+"',"+str(precioLibro)+",2,"+str(id_client)+")"
+    comando="insert into boleta(boleta_id, fecha, total, cliente_id)                                values("+str(id)+",'"+str(fecha.strftime("%d/%m/%Y"))+"',"+str(precioLibro)+","+str(id_client)+")"
     print("comando= "+comando)
     cur.execute(comando)
     print("creado")
@@ -100,9 +100,8 @@ def valCant(isbn):
     return rows
     
 
-#valCant(9788481093353)
+#print(valCant(9788481093353))
 #ahora debemos ejecutar la validacion cada vez que se presiona el boton y esto actualizara la BD.
-#update empleado set nombre = 'jose', apellido = 'cruz' where empleado_id = '2'
 def valorar(isbn, numero):
     cur = conn.cursor()
     rows = valCant(isbn)
@@ -143,6 +142,7 @@ def LibrosMasNuevos():
     conn.commit()
     return rows
 
+#funcion para contar cuantos clientes hay y crear uno nuevo despues
 def contarClientes():
     cur = conn.cursor()
     comando="select count(c.cliente_id) from cliente c"
