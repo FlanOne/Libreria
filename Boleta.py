@@ -1,8 +1,8 @@
 import tkinter as tk
 
 class Boleta(tk.Tk):
-    width = 500
-    height = 400
+    width = 700
+    height = 500
 
     def __init__(self, boleta_id, items, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,6 +44,7 @@ class Boleta(tk.Tk):
         subtotal_title_label = tk.Label(subtotal_frame, text="Subtotal", font=("Arial", 12, "bold"), bg="white")
         subtotal_title_label.pack(anchor="w")
 
+        total_books = 0  # Variable para almacenar la cantidad total de libros
         total_price = 0  # Variable para almacenar el precio total
 
         for item in items:
@@ -51,7 +52,7 @@ class Boleta(tk.Tk):
             cantidad = item["cantidad"]
             precio_unitario = item["precio_unitario"]
 
-            libro_label = tk.Label(nombre_frame, text=libro_nombre, font=("Arial", 12), bg="white", anchor="center")
+            libro_label = tk.Label(nombre_frame, text=libro_nombre, font=("Arial", 12), bg="white", anchor="w")
             libro_label.pack(fill=tk.X)
 
             cantidad_label = tk.Label(cantidad_frame, text=f"{cantidad}", font=("Arial", 12), bg="white")
@@ -64,20 +65,25 @@ class Boleta(tk.Tk):
             subtotal_label = tk.Label(subtotal_frame, text=f"${subtotal:.2f}", font=("Arial", 12), bg="white")
             subtotal_label.pack()
 
+            total_books += cantidad
             total_price += subtotal
+
+        # Mostrar la cantidad de libros a llevar
+        total_books_label = tk.Label(self, text=f"Cantidad de Libros: {total_books}", font=("Arial", 14, "bold"), bg="white")
+        total_books_label.pack(pady=30)
 
         # Mostrar el monto total a pagar
         total_label = tk.Label(self, text=f"Total a Pagar: ${total_price:.2f}", font=("Arial", 14, "bold"), bg="white")
         total_label.pack(pady=20)
 
-        self.close_button = tk.Button(self, text="Cerrar", command=self.destroy)
-        self.close_button.pack(pady=20)
+        self.aceptar_button = tk.Button(self, text="Aceptar", command=self.destroy)
+        self.aceptar_button.pack(pady=20)
 
 if __name__ == "__main__":
     items = [
-        {"nombre": "Harry Potter", "cantidad": 2, "precio_unitario": 10.99},
-        {"nombre": "El Gran Gatsby", "cantidad": 1, "precio_unitario": 15.99},
-        {"nombre": "Cien años de soledad", "cantidad": 3, "precio_unitario": 12.99}
+        {"nombre": "Justin Bieber la bibliografía.", "cantidad": 1, "precio_unitario": 89.990},
+        {"nombre": "BTS, su historia.", "cantidad": 1, "precio_unitario": 99.990},
+        {"nombre": "No se tiene enemigos.", "cantidad": 3, "precio_unitario": 75.500}
     ]
 
     boleta = Boleta(36387272, items)
