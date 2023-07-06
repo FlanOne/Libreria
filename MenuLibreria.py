@@ -14,12 +14,10 @@ customtkinter.set_default_color_theme("blue")
 
 class App(customtkinter.CTk):
     width = 1310
-    height = 790
+    height = 900
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        
         
         self.libro = []
         masVendidos = sql.LibrosMasVendidos()
@@ -29,7 +27,7 @@ class App(customtkinter.CTk):
         print(masVendidos[0][0])
 
         # configure window
-        self.title("Sistema - Libreria del Vicho.py")
+        self.title("Sistema - Librería VIMABE.py")
         self.iconbitmap("img/libro.ico")
         self.geometry(f"{self.width}x{self.height}")
         self.resizable(False, False)
@@ -213,8 +211,8 @@ class App(customtkinter.CTk):
         self.TituloLibro_entry = customtkinter.CTkEntry(self.frame_bloque4_infoA, width=350, placeholder_text="Titulo")
         self.TituloLibro_entry.grid(row=0, column=0, padx=30, pady=5)
 
-        self.FechaPublLibro_entry = customtkinter.CTkEntry(self.frame_bloque4_infoA, width=350, placeholder_text="Fecha de Publicación")
-        self.FechaPublLibro_entry.grid(row=5, column=0, padx=30, pady=5)
+        self.CantidadLibro_entry = customtkinter.CTkEntry(self.frame_bloque4_infoA, width=350, placeholder_text="Cantidad")
+        self.CantidadLibro_entry.grid(row=5, column=0, padx=30, pady=5)
 
         self.AutorLibro_entry = customtkinter.CTkEntry(self.frame_bloque4_infoA, width=350, placeholder_text="Autor")
         self.AutorLibro_entry.grid(row=6, column=0, padx=30, pady=5)
@@ -222,6 +220,11 @@ class App(customtkinter.CTk):
         self.PrecioLibro_entry = customtkinter.CTkEntry(self.frame_bloque4_infoA, width=350, placeholder_text="Precio")
         self.PrecioLibro_entry.grid(row=7, column=0, padx=30, pady=5)
 
+        ##Btn Añadir.
+        self.button_anadirLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Añadir")
+        self.button_anadirLibro.grid(row=8, column=0, padx=5, pady=7, sticky="nsew")
+
+        ##Btn Comprar.
         self.button_comprarLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Comprar")
         self.button_comprarLibro.grid(row=9, column=0, padx=5, pady=5, sticky="nsew")
 
@@ -233,7 +236,7 @@ class App(customtkinter.CTk):
     def InsertarLibro(self, a):
         self.TituloLibro_entry.delete(0,"end")
         self.IdLibro_entry.delete(0,"end")
-        self.FechaPublLibro_entry.delete(0,"end")
+        self.CantidadPublLibro_entry.delete(0,"end") ##Se cambió fecha a Cantidad.
         self.AutorLibro_entry.delete(0,"end")
         self.PrecioLibro_entry.delete(0,"end")
         self.textbox_frame_bloque4.delete("0.0","end")
@@ -242,7 +245,7 @@ class App(customtkinter.CTk):
         self.TituloLibro_entry.insert(0, str(a[0][2]))
         self.textbox_frame_bloque4.insert("0.0", str(a[0][5]))
         self.IdLibro_entry.insert(0, str(a[0][0]))
-        self.FechaPublLibro_entry.insert(0, str(a[0][3]))
+        self.CantidadPublLibro_entry.insert(0, str(a[0][3])) ##Se cambió fecha a Cantidad.
         self.AutorLibro_entry.insert(0, str(a[0][7]))
         self.PrecioLibro_entry.insert(0, str(a[0][4]))
 
