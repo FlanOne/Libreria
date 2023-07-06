@@ -80,6 +80,9 @@ if __name__ == "__main__":
         {"nombre": "Cien años de soledad", "cantidad": 3, "precio_unitario": 12.99}
     ]
 
+    
+    
+
     boleta = Boleta(36387272, items)
     boleta.geometry(f"{boleta.width}x{boleta.height}+500+200")  # Establecer tamaño y posición fija
     boleta.resizable(False, False)  # Deshabilitar el cambio de tamaño

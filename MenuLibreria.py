@@ -7,6 +7,8 @@ from tkinter import ttk
 from PIL import ImageTk, Image
 import Conectar as sql
 import InicioLibreria
+import Boleta
+import PruebaMane
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -200,8 +202,8 @@ class App(customtkinter.CTk):
 
         self.textbox_frame_bloque4 = customtkinter.CTkTextbox(self.frame_bloque4_infoA, width=350, height=220)
         self.textbox_frame_bloque4.grid(row=2, column=0, padx=5, pady=5, sticky="nsew")
-        self.textbox_frame_bloque4.insert("0.0", "Sinopsis\n\n" + "Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua.\n\n" * 20)
-
+        self.textbox_frame_bloque4.insert("0.0", "Sinopsis\n\n" )
+        ##aqui esta el boton de valorar estaran comentados
         #self.ValoracionLibro = customtkinter.CTkOptionMenu(master=self.frame_bloque4_infoA, values=["Calificar", "1", "2", "3", "4", "5"])
         #self.ValoracionLibro.grid(row=3, column=0, pady=5, padx=5, sticky="nsew")
         #self.ValoracionLibro.set("Calificar")
@@ -226,7 +228,7 @@ class App(customtkinter.CTk):
         self.button_anadirLibro.grid(row=8, column=0, padx=5, pady=7, sticky="nsew")
 
         ##Btn Comprar.
-        self.button_comprarLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Comprar")
+        self.button_comprarLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Comprar", command=lambda: self.boleta_event(True))
         self.button_comprarLibro.grid(row=9, column=0, padx=5, pady=5, sticky="nsew")
 
     def cambiarVariable(self, rows):
@@ -254,6 +256,20 @@ class App(customtkinter.CTk):
         
         self.btn13 = customtkinter.CTkButton(self.frame_bloque4_infoA1, image=self.bg_image13, text = "")
         self.btn13.grid(row=0, column=0, columnspan=1, rowspan=1, pady=2, padx=2)
+    
+    def boleta_event(self,value):
+        a= value
+
+        items = [
+        {"nombre": "Harry Potter", "cantidad": 2, "precio_unitario": 10.99},
+        {"nombre": "El Gran Gatsby", "cantidad": 1, "precio_unitario": 15.99},
+        {"nombre": "Cien años de soledad", "cantidad": 3, "precio_unitario": 12.99}
+    ]
+        
+        if a == True:
+            #self.destroy()
+            b=PruebaMane.App()
+            b.mainloop()
 
 if __name__ == "__main__":
     app = App()
