@@ -239,12 +239,12 @@ class App(customtkinter.CTk):
         self.textbox_frame_bloque4.delete("0.0","end")
 
 
-        self.TituloLibro_entry.insert(0, str(a[0][2]))
-        self.textbox_frame_bloque4.insert("0.0", str(a[0][5]))
-        self.IdLibro_entry.insert(0, str(a[0][0]))
-        self.FechaPublLibro_entry.insert(0, str(a[0][3]))
-        self.AutorLibro_entry.insert(0, str(a[0][7]))
-        self.PrecioLibro_entry.insert(0, str(a[0][4]))
+        self.TituloLibro_entry.insert(0, str(a[0][2]))        #0 2
+        self.textbox_frame_bloque4.insert("0.0", str(a[0][5]))#0 5
+        self.IdLibro_entry.insert(0, str(a[0][0]))#0 0
+        self.FechaPublLibro_entry.insert(0, str(a[0][3]))#0 3
+        self.AutorLibro_entry.insert(0, str(a[0][7])) #0 7
+        self.PrecioLibro_entry.insert(0, str(a[0][4]))#0 4
 
         self.bg_image13 = customtkinter.CTkImage(Image.open(self.current_path +"/imagenes/"+a[0][9]), size=(150,200))
         

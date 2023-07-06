@@ -141,6 +141,7 @@ def LibrosMasNuevos():
     rows = cur.fetchall()
     conn.commit()
     return rows
+print(LibrosMasNuevos())
 
 #funcion para contar cuantos clientes hay y crear uno nuevo despues
 def contarClientes():
