@@ -1,7 +1,7 @@
 import psycopg2
 import datetime
 
-conn = psycopg2.connect(host="localhost", database="Libreria", user="postgres", password="Admin")
+conn = psycopg2.connect(host="localhost", database="Libreria", user="postgres", password="hr")
 
 def comprobarCliente(user, password):
     
