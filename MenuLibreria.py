@@ -236,7 +236,7 @@ class App(customtkinter.CTk):
     def InsertarLibro(self, a):
         self.TituloLibro_entry.delete(0,"end")
         self.IdLibro_entry.delete(0,"end")
-        self.CantidadPublLibro_entry.delete(0,"end") ##Se cambió fecha a Cantidad.
+        #self.CantidadPublLibro_entry.delete(0,"end") ##Se cambió fecha a Cantidad.
         self.AutorLibro_entry.delete(0,"end")
         self.PrecioLibro_entry.delete(0,"end")
         self.textbox_frame_bloque4.delete("0.0","end")
@@ -245,7 +245,7 @@ class App(customtkinter.CTk):
         self.TituloLibro_entry.insert(0, str(a[0][2]))
         self.textbox_frame_bloque4.insert("0.0", str(a[0][5]))
         self.IdLibro_entry.insert(0, str(a[0][0]))
-        self.CantidadPublLibro_entry.insert(0, str(a[0][3])) ##Se cambió fecha a Cantidad.
+        #self.CantidadPublLibro_entry.insert(0, str(a[0][3])) ##Se cambió fecha a Cantidad.
         self.AutorLibro_entry.insert(0, str(a[0][7]))
         self.PrecioLibro_entry.insert(0, str(a[0][4]))
 
