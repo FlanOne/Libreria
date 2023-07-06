@@ -31,6 +31,7 @@ class App(customtkinter.CTk):
         self.iconbitmap("img/libro.ico")
         self.geometry(f"{self.width}x{self.height}")
         self.resizable(False, False)
+        self.state('zoomed')
 
         #FRAME 1 #####################################################################################################################
         self.frame_bloque1_info = customtkinter.CTkFrame(master=self)
