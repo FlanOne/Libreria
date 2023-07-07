@@ -8,7 +8,6 @@ from PIL import ImageTk, Image
 import Conectar as sql
 import InicioLibreria
 import Boleta
-import PruebaMane
 
 customtkinter.set_appearance_mode("System")
 customtkinter.set_default_color_theme("blue")
@@ -17,6 +16,8 @@ customtkinter.set_default_color_theme("blue")
 class App(customtkinter.CTk):
     width = 1310
     height = 900
+    items=[]
+    id=0
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -25,9 +26,9 @@ class App(customtkinter.CTk):
         masVendidos = sql.LibrosMasVendidos()
         masNuevos = sql.LibrosMasNuevos()
         masValorados = sql.librosMasValorados()
+        
 
-        print(masVendidos[0][0])
-
+        
         # configure window
         self.title("Sistema - Librería VIMABE.py")
         self.iconbitmap("img/libro.ico")
@@ -223,12 +224,13 @@ class App(customtkinter.CTk):
         self.PrecioLibro_entry = customtkinter.CTkEntry(self.frame_bloque4_infoA, width=350, placeholder_text="Precio")
         self.PrecioLibro_entry.grid(row=7, column=0, padx=30, pady=5)
 
-        ##Btn Añadir.
-        self.button_anadirLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Añadir")
+        ##Btn Añadir. ###aqui esta el cambio
+        self.button_anadirLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Añadir", command=lambda: ( sql.agregarLibroxCompra(self.IdLibro_entry.get(), self.CantidadLibro_entry.get()) 
+                                                                                                                           ,self.insertar_carro(self.cambiarVariable(sql.buscaIsbn(self.IdLibro_entry.get())),self.CantidadLibro_entry.get(),self.IdLibro_entry.get()) ))
         self.button_anadirLibro.grid(row=8, column=0, padx=5, pady=7, sticky="nsew")
 
         ##Btn Comprar.
-        self.button_comprarLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Comprar", command=lambda: self.boleta_event(True))
+        self.button_comprarLibro = customtkinter.CTkButton(master=self.frame_bloque4_infoA, text="Comprar", command=lambda: self.boleta_event())
         self.button_comprarLibro.grid(row=9, column=0, padx=5, pady=5, sticky="nsew")
 
     def cambiarVariable(self, rows):
@@ -257,19 +259,23 @@ class App(customtkinter.CTk):
         self.btn13 = customtkinter.CTkButton(self.frame_bloque4_infoA1, image=self.bg_image13, text = "")
         self.btn13.grid(row=0, column=0, columnspan=1, rowspan=1, pady=2, padx=2)
     
-    def boleta_event(self,value):
-        a= value
-
-        items = [
-        {"nombre": "Harry Potter", "cantidad": 2, "precio_unitario": 10.99},
-        {"nombre": "El Gran Gatsby", "cantidad": 1, "precio_unitario": 15.99},
-        {"nombre": "Cien años de soledad", "cantidad": 3, "precio_unitario": 12.99}
-    ]
+    ##llama a la ventana boleta con los libros seleccionados
+    def boleta_event(self):
+        Boleta.Boleta(self.id,self.items)
+            
+    #llena el carrito con libros       
+    def insertar_carro(self,a, cantidad, isbn):
+        boleta_id= (sql.NumeroComrpras()-1)
+        self.id= boleta_id
+        print("EL ISBN ES: "+isbn+" EL ID DE LA BOLETA ES: "+str(boleta_id))
+        precios = sql.retornarPrecios(isbn, boleta_id)
+        print(precios)
         
-        if a == True:
-            #self.destroy()
-            b=PruebaMane.App()
-            b.mainloop()
+
+        listaJson = {"nombre": a[0][2], "cantidad": cantidad , "precio_unitario": a[0][4], "subtotal": precios[0][0], "total_price": precios[0][1]}
+        self.items.append(listaJson)
+        print(self.items)
+
 
 if __name__ == "__main__":
     app = App()

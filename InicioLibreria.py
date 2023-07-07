@@ -37,7 +37,7 @@ class App(customtkinter.CTk):
         self.password_entry = customtkinter.CTkEntry(self.login_frame, width=200, show="*", placeholder_text="password")
         self.password_entry.grid(row=2, column=0, padx=30, pady=(0, 15))
 
-        self.login_button = customtkinter.CTkButton(self.login_frame, text="Ingresar", command=lambda: self.login_event(sql.comprobarCliente(self.username_entry.get(), self.password_entry.get())), width=200)
+        self.login_button = customtkinter.CTkButton(self.login_frame, text="Ingresar", command=lambda: self.login_event(sql.comprobarCliente(sql.agregarBoleta(sql.traerIdCliente(self.username_entry.get())), self.password_entry.get())), width=200)
         self.login_button.grid(row=4, column=0, padx=30, pady=(5, 5))
 
         self.register_button = customtkinter.CTkButton(self.login_frame, text="Registrarse", command=self.register_event, width=200)

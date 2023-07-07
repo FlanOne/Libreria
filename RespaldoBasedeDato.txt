@@ -27,12 +27,10 @@ stock_actual integer,
 stock_max integer,
 CONSTRAINT isbn FOREIGN KEY (isbn)
         REFERENCES public.libro (isbn) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID
+        
 );
 
-
+drop table inventario
 
 CREATE TABLE public.boleta
 (
@@ -65,19 +63,14 @@ CREATE TABLE public.libroxcompra
         ON DELETE NO ACTION
         NOT VALID
 );
-drop table libroxcompra;
-drop table libro;
-drop table boleta;
-drop table cliente;
+
  
 
 insert into cliente values('1','Ernesto','Paredes','26/9/1999','Huechuraba','+34971083785','ernesto@gmail.com','123');
 insert into cliente values('2','Benjamin','Sanchez','28/11/2000','Las Condes','642379224','benja@gmail.com','123');
 insert into cliente values('3','Michelle','Santos','28/3/2000','Vitacura','+34912536908','michelle@gmail.com','123');
 
-select * from cliente;
-select * from libro
-order by libro_id;
+
 
 insert into libro values('9788481093353','1','DON QUIJOTE DE LA MANCHA (VOL. 1)','1/1/1605','25900',
 						   'un hidalgo',
@@ -104,9 +97,9 @@ insert into inventario values('9788466657662','30','30');
 insert into inventario values('9788415922940','30','30');
 insert into inventario values('9789877251470','30','30');
 insert into inventario values('8420651362','30','30');
-						  
+select * from inventario;						  
 
-
+	
 select * from boleta;
 
 insert into boleta values('1','12/12/2022','28530','1');
@@ -123,4 +116,370 @@ insert into libroxcompra values('9788481093353','3','1');
 insert into libroxcompra values('8420651362','4','1');
 insert into libroxcompra values('9788466657662','5','2');
 
+
+--creacion de triggers
+
+---------------------------------------------------------------------------
+--trigger que crea por defecto un espacio de inventario al momento de 
+create or replace function insertar_inv() returns trigger
+as $a$
+declare
+
+begin
+insert into inventario values (new.isbn, '30','30');
+return new;
+end
+$a$
+LANGUAGE plpgsql;
+
+create or replace trigger  tr_insert after insert on libro
+for each row
+execute procedure insertar_inv();
+
+------------------------------------------------------------------
+
+--retorna un true o un false si la cantidad comprada es mayor o no al stock actual de producto
+CREATE OR REPLACE FUNCTION existe(maradona varchar, canti int) RETURNS boolean AS $$
+DECLARE
+   actu int;
+BEGIN
+   SELECT stock_actual INTO actu FROM inventario WHERE isbn=maradona;
+   IF canti <= actu THEN
+      RETURN true;
+   ELSE
+       RETURN false;
+   END IF;
+END
+$$ LANGUAGE plpgsql;
+drop function existe(character varying,integer)
+
+
+--!suma todos los sub_totales de los libros y actualiza el total de la boleta
+CREATE OR REPLACE FUNCTION sp_actualiza_total(id_b int) returns numeric  AS $$
+DECLARE
+   suma numeric := 0;
+BEGIN
+   SELECT sum(sub_total) INTO suma FROM libroxcompra WHERE boleta_id = id_b;
+   UPDATE boleta SET total = suma WHERE boleta_id = id_b;
+   return suma;
+END
+$$ LANGUAGE plpgsql;
+
+--!reduce el inventario dependiendo de la cantidad seleccioanda que se compro
+CREATE OR REPLACE FUNCTION trg_venta() RETURNS TRIGGER AS $$
+DECLARE
+  existe_boleta int;
+  saldo boolean;
+  idt varchar;
+BEGIN
+	idt:=new.isbn;
+  SELECT count(boleta_id) INTO existe_boleta FROM boleta WHERE boleta_id = NEW.boleta_id;
+  IF existe_boleta = 0 THEN
+     RAISE EXCEPTION 'boleta_no_existe';
+  END IF;
+  saldo := existe(idt, NEW.cantidad_comprada);
+  IF saldo THEN
+     UPDATE inventario SET stock_actual = stock_actual - NEW.cantidad_comprada WHERE isbn = idt;
+  ELSE
+     RAISE EXCEPTION 'saldo_insuficiente';
+  END IF;
+  RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+     RAISE;
+END
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE FUNCTION trg_actualiza_monto() RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM sp_actualiza_total(NEW.boleta_id);
+  RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_venta_trigger
+BEFORE INSERT ON libroxcompra
+FOR EACH ROW
+EXECUTE FUNCTION trg_venta();
+
+CREATE TRIGGER trg_actualiza_monto_trigger
+AFTER INSERT ON libroxcompra
+FOR EACH ROW
+EXECUTE FUNCTION trg_actualiza_monto();
+
+
+
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+--procedimiento que actualiza los precios de los libroxcompra
+--actualiza todos los sub totales de libroxcompra
+create or replace procedure pr_actualizar_precios() as $$ 
+declare cur_detalles cursor for select * from libroxcompra;
+saldo int;
+
+begin
+
+	for reg in cur_detalles loop
+		select l.precio * x.cantidad_comprada into saldo
+		from libroxcompra x join libro l on (x.isbn = l.isbn) where x.isbn = reg.isbn;
+		if saldo > 0 then
+			update libroxcompra set sub_total=saldo where isbn = reg.isbn and boleta_id = reg.boleta_id;
+		end if;
+		
+	end loop;
+	
+end
+$$
+LANGUAGE plpgsql;
+
+CALL pr_actualizar_precios();
+
+--------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION descuento_cumpleanos()
+RETURNS TRIGGER AS $$
+BEGIN
+    DECLARE
+        fecha_cumpleanos DATE;
+    BEGIN
+        SELECT fecha_nacimiento INTO fecha_cumpleanos
+        FROM cliente
+        WHERE cliente_id = NEW.cliente_id;
+
+        IF EXTRACT(DAY FROM CURRENT_DATE) = EXTRACT(DAY FROM fecha_cumpleanos) AND
+           EXTRACT(MONTH FROM CURRENT_DATE) = EXTRACT(MONTH FROM fecha_cumpleanos) THEN
+            NEW.total := NEW.total * 0.5;
+        END IF;
+
+        RETURN NEW;
+    END;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_descuento_cumpleanos
+BEFORE INSERT ON boleta
+FOR EACH ROW
+EXECUTE FUNCTION descuento_cumpleanos();
+
+--Probar.
+select * from cliente;
+INSERT INTO boleta (boleta_id, fecha, total, cliente_id)
+VALUES (8, '2023-09-26', 10000, 1);
+SELECT * FROM boleta;
+select * from libroxcompra
+
+	
+	
+	
+---------------------------------------------------------------------------------------------------------------------	
+	
+CREATE OR REPLACE FUNCTION verificar_participacion()
+RETURNS TRIGGER AS $$
+DECLARE
+    cantidad_libros INTEGER;
+    fecha_actual DATE;
+BEGIN
+    SELECT COUNT(*) INTO cantidad_libros
+    FROM libroxcompra
+    WHERE boleta_id = NEW.boleta_id;
+
+    fecha_actual := CURRENT_DATE;
+	--dia del libro
+    IF EXTRACT(DAY FROM fecha_actual) = 23 AND EXTRACT(MONTH FROM fecha_actual) = 4 THEN
+        -- Verifica la cantidad de libros y muestra el mensaje correspondiente
+        IF cantidad_libros = 2 THEN
+            RAISE NOTICE 'Puede participar. Tiene un 15%% de probabilidades de ganar.';
+        ELSIF cantidad_libros = 4 THEN
+            RAISE NOTICE 'Puede participar. Tiene un 35%% de probabilidades de ganar.';
+        ELSIF cantidad_libros = 6 THEN
+            RAISE NOTICE 'Puede participar. Tiene un 50%% de probabilidades de ganar.';
+        ELSIF cantidad_libros = 3 OR cantidad_libros = 5 THEN
+            RAISE NOTICE 'No puede participar.';
+        ELSE
+            RAISE NOTICE 'No puede participar.';
+        END IF;
+    ELSE
+        RAISE NOTICE 'No puede participar.';
+    END IF;
+
+    RETURN NEW;
+END
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_verificar_participacion
+AFTER update ON boleta
+FOR EACH ROW
+EXECUTE FUNCTION verificar_participacion();
+
+--Probar.
+select * from boleta;
+select * from cliente;
+select * from libroxcompra;
+
+INSERT INTO boleta (boleta_id, fecha, total, cliente_id)
+VALUES (1, '2023-04-23', 10000, 1);
+
+INSERT INTO libroxcompra (isbn, boleta_id, cantidad_comprada, sub_total)
+VALUES ('9788415922940', 10, 1, 9990);
+
+DO $$
+DECLARE
+    mensaje TEXT;
+BEGIN
+    PERFORM verificar_participacion();
+
+    GET DIAGNOSTICS mensaje = PG_CONTEXT;
+
+    RAISE NOTICE '%', mensaje;
+END $$	
+
+
+
+------------------------------------------------
+
+
+
+--Función rotorna calificación promedio y su autor.
+CREATE OR REPLACE FUNCTION obtener_calificacion_promedio(isbn_param VARCHAR)
+RETURNS TABLE (autor VARCHAR, calificacion_promedio NUMERIC) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT l.autor, AVG(l.calificacion) AS calificacion_promedio
+    FROM libro l
+    WHERE l.isbn = isbn_param
+    GROUP BY l.autor;
+END;
+$$ LANGUAGE plpgsql;
+
+--Probar.
+SELECT * FROM obtener_calificacion_promedio('9788481093353');
+
+--Función informe clientes con el libro comprado y la fecha la cual se compró.
+CREATE OR REPLACE FUNCTION obtener_informe_clientes_libros()
+RETURNS TABLE (
+    cliente_id INTEGER,
+    cliente_nombre VARCHAR,
+    libro_nombre VARCHAR,
+    fecha_compra DATE
+)
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT c.cliente_id, c.nombre AS cliente_nombre, l.nombre AS libro_nombre, b.fecha AS fecha_compra
+    FROM cliente c
+    JOIN boleta b ON c.cliente_id = b.cliente_id
+    JOIN libroxcompra lc ON b.boleta_id = lc.boleta_id
+    JOIN libro l ON lc.isbn = l.isbn;
+END;
+$$ LANGUAGE plpgsql;
+
+--Probar.
+SELECT * FROM obtener_informe_clientes_libros();
+
+
+
+--Trigger que registra en tabla la creación de nuevo usuario la cual muestra el correo y fecha.
+CREATE TABLE registro_sesion_cliente (
+    id SERIAL PRIMARY KEY,
+    correo VARCHAR NOT NULL,
+    fecha_hora_inicio TIMESTAMP NOT NULL
+);
+
+CREATE OR REPLACE FUNCTION registrar_sesion_cliente()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO registro_sesion_cliente (correo, fecha_hora_inicio)
+    VALUES (NEW.correo, CURRENT_TIMESTAMP);
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER trigger_registro_sesion_cliente
+AFTER INSERT ON cliente
+FOR EACH ROW
+EXECUTE FUNCTION registrar_sesion_cliente();
+
+--Probar.
+select * from cliente;
+
+INSERT INTO cliente (cliente_id, nombre, apelliddo, contrasena, correo) 
+VALUES (6, 'Marianela', 'Lara', '123', 'marianela@gmail.com');
+
+SELECT * FROM registro_sesion_cliente;
+
+
+--Procedimiento que cuenta las compras de un cliente desde una fecha inicial y fecha final.
+CREATE OR REPLACE PROCEDURE contar_compras_cliente(
+    p_cliente_id INTEGER,
+    p_fecha_inicial DATE,
+    p_fecha_final DATE,
+    OUT total_compras INTEGER
+)
+AS $$
+BEGIN
+    SELECT COUNT(*) INTO total_compras
+    FROM boleta b
+    JOIN libroxcompra lc ON b.boleta_id = lc.boleta_id
+    WHERE b.cliente_id = p_cliente_id
+    AND b.fecha BETWEEN p_fecha_inicial AND p_fecha_final;
+END;
+$$ LANGUAGE plpgsql;
+
+--Probar.
+DO $$
+DECLARE
+    total INTEGER;
+BEGIN
+    CALL contar_compras_cliente(4, '2023-07-07', '2023-07-07', total);
+    RAISE NOTICE 'El cliente ha realizado % compras en el rango de fechas especificado.', total;
+END $$;
+-----------------------------------------------------------------------------------------------
+--Procedimiento que genera informe de inventario.
+CREATE OR REPLACE PROCEDURE generar_reporte_inventario()
+AS $$
+DECLARE
+    libro_row libro%ROWTYPE;
+    inventario_row inventario%ROWTYPE;
+BEGIN
+    FOR libro_row IN SELECT * FROM libro
+    LOOP
+        RAISE NOTICE 'Libro: %', libro_row.nombre;
+
+        SELECT * INTO inventario_row
+        FROM inventario
+        WHERE isbn = libro_row.isbn;
+
+        RAISE NOTICE 'Stock actual: %, Stock máximo: %', inventario_row.stock_actual, inventario_row.stock_max;
+
+        RAISE NOTICE '----------------------------------------';
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql;
+
+--Probar.
+CALL generar_reporte_inventario();
+
+--Procedimiento autores y cantidad de libros.
+CREATE OR REPLACE PROCEDURE generar_informe_total_libros_autores()
+AS $$
+DECLARE
+    total_libros INTEGER;
+    total_autores INTEGER;
+BEGIN
+    SELECT COUNT(*) INTO total_libros FROM libro;
+    SELECT COUNT(DISTINCT autor) INTO total_autores FROM libro;
+
+    RAISE NOTICE 'Total de libros: %', total_libros;
+    RAISE NOTICE 'Total de autores: %', total_autores;
+END;
+$$ LANGUAGE plpgsql;
+
+--Probar.
+CALL generar_informe_total_libros_autores();
+
+select * from inventario;
 

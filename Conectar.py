@@ -19,7 +19,15 @@ def comprobarCliente(user, password):
         return True
 
 #comprobarCliente("ernesto@gmail.com" , "123")        
-    
+def traerIdCliente(user):
+    cur= conn.cursor()
+    comando = "select c.cliente_id, c.correo from cliente c where c.correo = '"+user+"'"
+    cur.execute(comando)
+    rows = cur.fetchall()
+    conn.commit()
+    return rows
+
+
 
 
 def LibrosMasVendidos():
@@ -44,16 +52,17 @@ def buscadorNombreIsbn(nombre):
     return rows
 
 #print(buscadorNombreIsbn('Vagabond 01'))
-
-#retornar cliente para guardarlo en el inicio de sesion para cuando vaya a comprar quede registrado
-def traerClienteId(user, password):
-    
-    cur= conn.cursor()
-    comando = "select c.cliente_id from cliente c where c.correo = '"+user+"' and c.contrasena = '"+password+"'"
+def buscaIsbn(isbn):
+    cur = conn.cursor()
+    comando= "select isbn, libro_id, nombre, to_char(fecha_publicacion, 'dd/mm/yyyy'), precio,sinopsis, stock_actual, autor, calificacion, imagen, calificaciones from libro join inventario using(isbn) where  isbn = '"+isbn+"'"
+    #comando = "select * from libro l where  l.nombre = '"+nombre+"'"
     cur.execute(comando)
-    rows = cur.fetchall() ##pasar arreglo a la variable row
+    rows = cur.fetchall()
     conn.commit()
+    #print(rows)
     return rows
+
+
 
 
 #crear una compra para esto debemos asegurarnos cuantas compras ya hay para crear el id entonces creamos un metodo
@@ -69,25 +78,29 @@ def NumeroComrpras():
     print(id)
     return id
 
-def agregarCompra(id_client, precioLibro):
+def agregarBoleta(id_client):
     cur = conn.cursor()
     id = NumeroComrpras()
     fecha = datetime.datetime.now()
-    comando="insert into boleta(boleta_id, fecha, total, cliente_id)                                values("+str(id)+",'"+str(fecha.strftime("%d/%m/%Y"))+"',"+str(precioLibro)+","+str(id_client)+")"
-    print("comando= "+comando)
+    comando="insert into boleta(boleta_id, fecha, total, cliente_id)                                values("+str(id)+",'"+str(fecha.strftime("%d/%m/%Y"))+"','"+str(0)+"',"+str(id_client[0][0])+")"
+    #print("comando= "+comando)
     cur.execute(comando)
     print("creado")
     conn.commit()
-    return id
+    return id_client[0][1]
 
-def agregarCompraLibro(isbn, cantidadComrpada, id_client, precioLibro ):
+
+def agregarLibroxCompra(isbn, cantidadComrpada):
     cur = conn.cursor()
-    idComrpa=agregarCompra(id_client, precioLibro)
-    comando ="insert into libroxcompra values("+isbn+","+str(idComrpa)+","+cantidadComrpada+")"
+    boleta_id= (NumeroComrpras()-1)
+    lista=buscaIsbn(isbn)
+    subtotal=0
+    subtotal=(lista[0][4] * int(cantidadComrpada))
+    comando ="insert into libroxcompra values("+isbn+","+str(boleta_id)+","+str(cantidadComrpada)+","+str(subtotal)+")"
     cur.execute(comando)
     print("creado con exito")
     conn.commit()
-    
+#agregarLibroxCompra("9788415922940",2)
 #agregarCompraLibro("9788466657662", "2", "2", "28530")
 
 #retornnamos calificacion y la cantida de gente que a votado para sacar un promedio
@@ -162,7 +175,13 @@ def agregarCliente( nombre, apellido, fecha_nacimiento, direccion, telefono, cor
     print("creado con exito")
     conn.commit()
 
-##SEOKJINTEAMOOOO
-#Benja troll
-#Que gila porfavor dejemos de llorar por todas las notas existentes pipipipipipi
-#se terminan los comentarios en el main
+#funcion que nos retorna el sub_total y total de un libro comprado
+def retornarPrecios(isbn, boleta_id):
+    cur = conn.cursor()
+    comando = "select sub_total, total from libroxcompra join boleta using (boleta_id) where isbn = '"+str(isbn)+"' "+"and boleta_id = '"+str(boleta_id)+"'"
+    cur.execute(comando)
+    rows = cur.fetchall()
+    conn.commit()
+    return rows
+
+

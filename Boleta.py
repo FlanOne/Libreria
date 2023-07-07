@@ -50,6 +50,12 @@ class Boleta(tk.Tk):
             libro_nombre = item["nombre"]
             cantidad = item["cantidad"]
             precio_unitario = item["precio_unitario"]
+            #ideas 
+            print(item["subtotal"])
+            subtotal =  float(cantidad) * float(precio_unitario)
+            total_price = item["total_price"]
+
+
 
             libro_label = tk.Label(nombre_frame, text=libro_nombre, font=("Arial", 12), bg="white", anchor="center")
             libro_label.pack(fill=tk.X)
@@ -60,11 +66,11 @@ class Boleta(tk.Tk):
             precio_unitario_label = tk.Label(precio_unitario_frame, text=f"${precio_unitario:.2f}", font=("Arial", 12), bg="white")
             precio_unitario_label.pack()
 
-            subtotal = cantidad * precio_unitario
+            #subtotal = cantidad * precio_unitario
             subtotal_label = tk.Label(subtotal_frame, text=f"${subtotal:.2f}", font=("Arial", 12), bg="white")
             subtotal_label.pack()
 
-            total_price += subtotal
+            #total_price += subtotal
 
         # Mostrar el monto total a pagar
         total_label = tk.Label(self, text=f"Total a Pagar: ${total_price:.2f}", font=("Arial", 14, "bold"), bg="white")
@@ -74,16 +80,16 @@ class Boleta(tk.Tk):
         self.close_button.pack(pady=20)
 
 if __name__ == "__main__":
-    items = [
-        {"nombre": "Harry Potter", "cantidad": 2, "precio_unitario": 10.99},
-        {"nombre": "El Gran Gatsby", "cantidad": 1, "precio_unitario": 15.99},
-        {"nombre": "Cien años de soledad", "cantidad": 3, "precio_unitario": 12.99}
-    ]
+    #items = [
+     #   {"nombre": "Harry Potter", "cantidad": 2, "precio_unitario": 10.99},
+     #   {"nombre": "El Gran Gatsby", "cantidad": 1, "precio_unitario": 15.99},
+     #   {"nombre": "Cien años de soledad", "cantidad": 3, "precio_unitario": 12.99}
+    #]
 
     
     
-
-    boleta = Boleta(36387272, items)
+    #36387272
+    boleta = Boleta()
     boleta.geometry(f"{boleta.width}x{boleta.height}+500+200")  # Establecer tamaño y posición fija
     boleta.resizable(False, False)  # Deshabilitar el cambio de tamaño
     boleta.mainloop()
